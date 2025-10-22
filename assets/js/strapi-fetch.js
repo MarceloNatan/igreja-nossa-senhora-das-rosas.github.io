@@ -6,11 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const query = JSON.stringify({
         query: `
             query GetArtigos {
-                // Tenta buscar a entidade no formato singular mais seguro
-                artigoEntities { 
+                // Tenta buscar a entidade no formato plural simples (mais provável de funcionar)
+                artigos { 
                     data {
                         attributes {
-                            // Usamos "Titulo" com T maiúsculo
+                            // Usamos "Titulo" com T maiúsculo (conforme seu schema)
                             Titulo 
                             slug
                             data_publicacao
@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
     })
     .then(result => {
-        // Acesso ao array de dados: result.data.artigoEntities.data
-        const artigos = result.data.artigoEntities.data;
+        // Acesso ao array de dados: result.data.artigos.data
+        const artigos = result.data.artigos.data;
         const container = document.getElementById('artigos-lista');
         container.innerHTML = ''; 
 
