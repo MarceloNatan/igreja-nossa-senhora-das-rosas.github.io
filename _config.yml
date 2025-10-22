@@ -64,3 +64,9 @@ author:
 social:
   twitter: "seu_twitter"
   github: "seu_github"
+
+# Arquivo: _config.yml
+# ... (outras configurações)
+
+# ADICIONE ISTO TEMPORARIAMENTE:
+timestamp: {{ site.time | date: '%s' }}
