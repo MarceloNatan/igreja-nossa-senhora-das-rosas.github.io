@@ -1,4 +1,4 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E MAIS SEGURO
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E SEGURO
 
 document.addEventListener('DOMContentLoaded', () => {
     // URL HTTPS SEGURA com 'populate=*'
@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(apiURL)
         .then(response => {
             if (!response.ok) {
-                // Se a conexão falhar, lança um erro, mas agora sabemos que é problema do CMS
-                throw new Error(`Erro ao conectar ao CMS: ${response.status}`);
+                throw new Error(`Erro de rede no CMS: ${response.status}`);
             }
             return response.json();
         })
@@ -18,12 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.data && data.data.length > 0) {
                 data.data.forEach(item => {
-                    // Item.attributes é o objeto que contém todos os seus dados
+                    // VERIFICAÇÃO CRÍTICA: Se item ou item.attributes estiver faltando, pule
+                    if (!item.attributes) {
+                        console.warn("Item de artigo inválido encontrado no Strapi. Pulando.");
+                        return; // Pula este item corrompido
+                    }
+
                     const artigo = item.attributes;
                     
-                    // CORREÇÃO FINAL DE ERRO: 
-                    // Tenta ler data_publicacao, ou usa a data de criação do Strapi (createdAt)
-                    // O '|| new Date()' evita o 'TypeError' lendo de um campo nulo.
+                    // LÓGICA ROBUSTA DE DATA: Tenta ler data_publicacao, ou usa a data de criação.
                     const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
                     const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
 
@@ -47,6 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('Erro de Integração Strapi (Final):', error);
-            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica: O CMS está inacessível. (Verifique Nginx/PM2).</p>`;
+            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha de conexão com o CMS.</p>`;
         });
 });
