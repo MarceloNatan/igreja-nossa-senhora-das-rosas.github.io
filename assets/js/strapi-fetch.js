@@ -1,54 +1,75 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E SEGURO
+// Arquivo: assets/js/strapi-fetch.js - USANDO GraphQL
 
 document.addEventListener('DOMContentLoaded', () => {
-    // URL HTTPS SEGURA com 'populate=*'
-    const apiURL = 'https://cms.igrejanossasenhoradasrosas.com.br/api/artigos?populate=*';
+    // 1. Defina a URL do Endpoint GraphQL
+    const graphqlURL = 'https://cms.igrejanossasenhoradasrosas.com.br/graphql';
 
-    fetch(apiURL)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erro de rede no CMS: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const container = document.getElementById('artigos-lista');
-            container.innerHTML = ''; 
-
-            if (data.data && data.data.length > 0) {
-                data.data.forEach(item => {
-                    // VERIFICAÇÃO CRÍTICA: Se item ou item.attributes estiver faltando, pule
-                    if (!item.attributes) {
-                        console.warn("Item de artigo inválido encontrado no Strapi. Pulando.");
-                        return; // Pula este item corrompido
+    // 2. Defina a QUERY (A Pergunta)
+    const query = JSON.stringify({
+        query: `
+            query ArtigosQuery {
+                artigos (pagination: { limit: 6 }, publicationState: LIVE) {
+                    data {
+                        attributes {
+                            titulo
+                            slug
+                            data_publicacao
+                            createdAt 
+                        }
                     }
+                }
+            }
+        `
+    });
 
-                    const artigo = item.attributes;
-                    
-                    // LÓGICA ROBUSTA DE DATA: Tenta ler data_publicacao, ou usa a data de criação.
-                    const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
-                    const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
+    fetch(graphqlURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: query,
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro GraphQL: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(result => {
+        // Agora, os dados são acessados via result.data.artigos.data
+        const artigos = result.data.artigos.data;
+        const container = document.getElementById('artigos-lista');
+        container.innerHTML = ''; 
 
-                    const cardHTML = `
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h5 class="card-title">${artigo.titulo}</h5>
-                                    <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
-                                    
-                                    <a href="/artigos/${artigo.slug}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
-                                </div>
+        if (artigos && artigos.length > 0) {
+            artigos.forEach(item => {
+                const artigo = item.attributes;
+                
+                // LÓGICA ROBUSTA DE DATA: 
+                // Tenta data_publicacao, usa createdAt se falhar.
+                const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
+                const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
+
+                const cardHTML = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">${artigo.titulo}</h5>
+                                <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
+                                
+                                <a href="/artigos/${artigo.slug}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
                             </div>
                         </div>
-                    `;
-                    container.innerHTML += cardHTML;
-                });
-            } else {
-                 container.innerHTML = '<p class="lead text-center">Dom Justino ainda não publicou artigos.</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Erro de Integração Strapi (Final):', error);
-            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha de conexão com o CMS.</p>`;
-        });
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        } else {
+             container.innerHTML = '<p class="lead text-center">Nenhum artigo publicado ainda.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Erro de Integração Strapi (GraphQL):', error);
+        document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica na API GraphQL.</p>`;
+    });
 });
