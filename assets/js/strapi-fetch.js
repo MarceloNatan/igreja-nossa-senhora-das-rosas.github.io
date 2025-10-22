@@ -1,13 +1,13 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL DE INTEGRAÇÃO
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E SEGURO
 
 document.addEventListener('DOMContentLoaded', () => {
-    // URL HTTPS SEGURA com o parâmetro 'populate=*' para buscar todos os campos
+    // URL HTTPS SEGURA com 'populate=*'
     const apiURL = 'https://cms.igrejanossasenhoradasrosas.com.br/api/artigos?populate=*';
 
     fetch(apiURL)
         .then(response => {
             if (!response.ok) {
-                // Se o Strapi não responder (código 404, 500, etc.)
+                // Se a conexão falhar, lança um erro, mas agora sabemos que é problema do CMS
                 throw new Error(`Erro ao conectar ao CMS: ${response.status}`);
             }
             return response.json();
@@ -16,14 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('artigos-lista');
             container.innerHTML = ''; 
 
-            // 1. Verificar se há dados
             if (data.data && data.data.length > 0) {
                 data.data.forEach(item => {
                     const artigo = item.attributes;
                     
-                    // 2. CORREÇÃO CRÍTICA: Tratar o campo 'data_publicacao' que pode ser nulo
-                    // Usa a data do artigo, ou a data atual como fallback para evitar o TypeError
-                    const dataOriginal = artigo.data_publicacao || new Date(); 
+                    // CORREÇÃO FINAL: Usa a data do artigo, ou a data de criação do item como fallback
+                    // Se 'data_publicacao' for nulo, usa a data de criação do Strapi ('createdAt')
+                    const dataOriginal = artigo.data_publicacao || artigo.createdAt; 
                     const dataFormatada = new Date(dataOriginal).toLocaleDateString('pt-BR');
 
                     const cardHTML = `
@@ -41,13 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.innerHTML += cardHTML;
                 });
             } else {
-                 // Mensagem se o array de artigos estiver vazio
-                 container.innerHTML = '<p class="lead text-center">Dom Justino ainda não publicou artigos. Volte em breve!</p>';
+                 container.innerHTML = '<p class="lead text-center">Dom Justino ainda não publicou artigos.</p>';
             }
         })
         .catch(error => {
-            // Este catch só deve rodar se a URL HTTPS falhar, o que agora é raro.
             console.error('Erro de Integração Strapi (Final):', error);
-            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica: O CMS está inacessível. (Verifique Nginx/PM2).</p>`;
+            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica: O CMS está inacessível.</p>`;
         });
 });
