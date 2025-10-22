@@ -1,17 +1,17 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E SEGURO COM NOVO GRAPHQL
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E ESTÁVEL COM CORREÇÃO DE SINTAXE
 
 document.addEventListener('DOMContentLoaded', () => {
     const graphqlURL = 'https://cms.igrejanossasenhoradasrosas.com.br/graphql';
 
-    // A Query será ajustada para o formato plural padrão do Strapi.
     const query = JSON.stringify({
         query: `
             query GetArtigos {
-                // Tenta o formato plural correto para a API
-                artigos { 
+                // Tenta buscar a entidade no formato singular mais seguro
+                artigoEntities { 
                     data {
                         attributes {
-                            Titulo
+                            // Usamos "Titulo" com T maiúsculo
+                            Titulo 
                             slug
                             data_publicacao
                             createdAt 
@@ -31,14 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(response => {
         if (!response.ok) {
-            // Este erro é 400 Bad Request
-            throw new Error(`Erro GraphQL: ${response.status}. Cheque o console para detalhes da Query.`);
+            // Se o status for 400, lança o erro
+            throw new Error(`Erro GraphQL: ${response.status}. Sintaxe de Query Incorreta.`);
         }
         return response.json();
     })
     .then(result => {
-        // Acesso ao array de dados: result.data.artigos.data
-        const artigos = result.data.artigos.data;
+        // Acesso ao array de dados: result.data.artigoEntities.data
+        const artigos = result.data.artigoEntities.data;
         const container = document.getElementById('artigos-lista');
         container.innerHTML = ''; 
 
@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
             artigos.forEach(item => {
                 const artigo = item.attributes;
                 
-                // Lógica de Data Segura (Agora deve funcionar sem o erro)
+                // Leitura e segurança de dados
+                const tituloDoArtigo = artigo.Titulo; 
                 const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
                 const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
 
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="col-md-4 mb-4">
                         <div class="card h-100 shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title">${artigo.Titulo}</h5>
+                                <h5 class="card-title">${tituloDoArtigo}</h5>
                                 <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
                                 
                                 <a href="/artigos/${artigo.slug}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
@@ -70,6 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
         console.error('Erro de Integração Strapi (FINAL):', error);
-        document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha ao carregar conteúdo editável.</p>`;
+        document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica: O CMS está inacessível. (Verifique console para mais detalhes).</p>`;
     });
 });
