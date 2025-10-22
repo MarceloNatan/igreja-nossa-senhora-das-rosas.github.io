@@ -1,17 +1,18 @@
-// Arquivo: assets/js/strapi-fetch.js - USANDO GraphQL
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL CORRIGIDO COM GRAPHQL
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Defina a URL do Endpoint GraphQL
     const graphqlURL = 'https://cms.igrejanossasenhoradasrosas.com.br/graphql';
 
-    // 2. Defina a QUERY (A Pergunta)
+    // 1. Defina a QUERY (A Pergunta) - Nomes em minúsculas para segurança
     const query = JSON.stringify({
         query: `
             query ArtigosQuery {
+                // A coleção sempre é referenciada no plural E minúsculas
                 artigos (pagination: { limit: 6 }, publicationState: LIVE) {
                     data {
                         attributes {
-                            titulo
+                            // ATENÇÃO AQUI: 'Titulo' (com 'T' maiúsculo) é o nome do campo no seu schema.
+                            Titulo 
                             slug
                             data_publicacao
                             createdAt 
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(response => {
         if (!response.ok) {
+            // Se o status for 400, lança o erro, mas agora sabemos que o problema é a Query
             throw new Error(`Erro GraphQL: ${response.status}`);
         }
         return response.json();
@@ -45,8 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
             artigos.forEach(item => {
                 const artigo = item.attributes;
                 
-                // LÓGICA ROBUSTA DE DATA: 
-                // Tenta data_publicacao, usa createdAt se falhar.
+                // Leitura do Título (AGORA COM 'T' MAIÚSCULO, conforme o schema.json)
+                const tituloDoArtigo = artigo.Titulo; 
+                
+                // LÓGICA DE DATA SEGURA
                 const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
                 const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
 
@@ -54,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="col-md-4 mb-4">
                         <div class="card h-100 shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title">${artigo.titulo}</h5>
+                                <h5 class="card-title">${tituloDoArtigo}</h5>
                                 <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
                                 
                                 <a href="/artigos/${artigo.slug}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
@@ -69,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
     .catch(error => {
-        console.error('Erro de Integração Strapi (GraphQL):', error);
-        document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica na API GraphQL.</p>`;
+        console.error('Erro de Integração Strapi (FINAL):', error);
+        // Não mostrar "CMS fora do ar" para evitar confusão, mas sim uma falha geral
+        document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha ao carregar conteúdo editável.</p>`;
     });
 });
