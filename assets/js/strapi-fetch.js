@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // ⚠️ ATENÇÃO: COLOQUE AQUI O SEU IP PÚBLICO DO DIGITALOCEAN
-    const apiURL = 'http://167.172.205.53:1337/api/artigos';
+    const apiURL = 'https://cms.igrejanossasenhoradasrosas.com.br/api/artigos';
 
     fetch(apiURL)
         .then(response => {
