@@ -1,0 +1,66 @@
+# Configuração básica do Jekyll
+
+# Informações do site
+title: "Meu Site"
+# Informações do site
+title: "Capela Nossa Senhora das Rosas"
+email: contato@igrejanossasenhoradasrosas.com.br
+description: |
+  Site oficial da Capela Nossa Senhora das Rosas, Farol de São Tomé, com os textos e cursos de Dom Justino (OSB).
+baseurl: ""
+url: "https://igrejanossasenhoradasrosas.com.br"
+
+# Theme
+theme: minima
+
+# Plugins (adicione os plugins que usa)
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Excluir arquivos/pastas do build
+exclude:
+  - "node_modules"
+  - "README.md"
+  - "LICENSE"
+
+# Configurações de build
+markdown: kramdown
+kramdown:
+  input: GFM
+
+# Defaults para posts e pages
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+
+# Permitir futuras configurações
+future: true
+
+# LSI (se utiliza)
+lsi: false
+
+# Padrões de permalinks
+permalink: /:categories/:year/:month/:day/:title/
+
+# Configurações de build para ambiente de produção
+
+environment: development
+
+# Custom variables
+author:
+  name: "Seu Nome"
+  email: "seu-email@exemplo.com"
+
+# Social links (exemplo)
+social:
+  twitter: "seu_twitter"
+  github: "seu_github"
