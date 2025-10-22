@@ -1,4 +1,4 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E SEGURO
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E MAIS SEGURO
 
 document.addEventListener('DOMContentLoaded', () => {
     // URL HTTPS SEGURA com 'populate=*'
@@ -18,12 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.data && data.data.length > 0) {
                 data.data.forEach(item => {
+                    // Item.attributes é o objeto que contém todos os seus dados
                     const artigo = item.attributes;
                     
-                    // CORREÇÃO FINAL: Usa a data do artigo, ou a data de criação do item como fallback
-                    // Se 'data_publicacao' for nulo, usa a data de criação do Strapi ('createdAt')
-                    const dataOriginal = artigo.data_publicacao || artigo.createdAt; 
-                    const dataFormatada = new Date(dataOriginal).toLocaleDateString('pt-BR');
+                    // CORREÇÃO FINAL DE ERRO: 
+                    // Tenta ler data_publicacao, ou usa a data de criação do Strapi (createdAt)
+                    // O '|| new Date()' evita o 'TypeError' lendo de um campo nulo.
+                    const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
+                    const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
 
                     const cardHTML = `
                         <div class="col-md-4 mb-4">
@@ -45,6 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('Erro de Integração Strapi (Final):', error);
-            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica: O CMS está inacessível.</p>`;
+            document.getElementById('artigos-lista').innerHTML = `<p class="text-danger text-center">Falha crítica: O CMS está inacessível. (Verifique Nginx/PM2).</p>`;
         });
 });
