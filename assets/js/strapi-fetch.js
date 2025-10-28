@@ -1,14 +1,13 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E SEGURO (REST API)
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL DE FUNCIONALIDADE (REST API)
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. URL da API REST com HTTPS e POPULATE
+    // URL REST API com HTTPS e POPULATE
     const apiURL = 'https://cms.igrejanossasenhoradasrosas.com.br/api/artigos?populate=*';
 
     fetch(apiURL)
         .then(response => {
             if (!response.ok) {
-                // Se a conexão falhar, lança um erro, mas agora sabemos que o problema é o CMS
-                throw new Error(`Erro ao conectar ao CMS: ${response.status}`);
+                throw new Error(`Erro de rede no CMS: ${response.status}`);
             }
             return response.json();
         })
@@ -18,15 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.data && data.data.length > 0) {
                 data.data.forEach(item => {
-                    // VERIFICAÇÃO CRÍTICA DE ATRIBUTOS
-                    if (!item.attributes) {
+                    // VERIFICAÇÃO CRÍTICA (Se o item estiver corrompido, pulamos)
+                    if (!item.attributes || !item.attributes.Titulo) { 
                         console.warn("Item de artigo inválido encontrado. Pulando.");
-                        return;
+                        return; 
                     }
                     
                     const artigo = item.attributes;
                     
-                    // Lógica de Data Segura
+                    // Ajuste o objeto aqui para o nome correto do campo "Titulo" (T maiúsculo)
+                    const tituloDoArtigo = artigo.Titulo; 
+                    
+                    // Lógica de Data Segura: Tenta a data publicada ou a data de criação
                     const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
                     const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
 
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 shadow-sm">
                                 <div class="card-body">
-                                    <h5 class="card-title">${artigo.Titulo}</h5>
+                                    <h5 class="card-title">${tituloDoArtigo}</h5>
                                     <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
                                     
                                     <a href="/artigos/${artigo.slug}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
@@ -45,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.innerHTML += cardHTML;
                 });
             } else {
-                 container.innerHTML = '<p class="lead text-center">Nenhum artigo publicado ainda.</p>';
+                 container.innerHTML = '<p class="lead text-center">Dom Justino ainda não publicou artigos.</p>';
             }
         })
         .catch(error => {
