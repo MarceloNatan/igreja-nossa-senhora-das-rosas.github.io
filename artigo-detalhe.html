@@ -14,35 +14,47 @@ title: Detalhe do Artigo
 </div>
 
 <script>
-    // ESTE SCRIPT BUSCA O ARTIGO CORRETO PELO SLUG NA URL
+    // SCRIPT FINAL DE BUSCA E EXIBIÇÃO DO ARTIGO
 
-    // 1. Obtém o slug da URL (ex: "artigoj")
+    // 1. Obtém o slug da URL
     const urlParams = new URLSearchParams(window.location.search);
     const slug = urlParams.get('slug');
-
+    
+    // URL REST API com filtro de slug e populate (para obter todos os dados)
+    const apiURL = `https://cms.igrejanossasenhoradasrosas.com.br/api/artigos?filters[slug][$eq]=${slug}&populate=*`;
+    
     if (slug) {
-        const apiURL = `https://cms.igrejanossasenhoradasrosas.com.br/api/artigos?filters[slug][$eq]=${slug}&populate=*`;
-        
         fetch(apiURL)
             .then(response => response.json())
             .then(data => {
                 const container = document.getElementById('artigo-detalhe-conteudo');
                 
                 if (data.data && data.data.length > 0) {
-                    const artigo = data.data[0]; 
-                    // Se o seu JSON é "flat", usamos o objeto inteiro, se não, usamos .attributes
-                    const content = artigo.attributes ? artigo.attributes : artigo; 
+                    const item = data.data[0];
+                    
+                    // CORREÇÃO CRÍTICA: Assume a estrutura plana que o JSON da API envia
+                    // O seu JSON não tem o 'attributes' aninhado, então usamos 'item' diretamente
+                    const content = item.attributes ? item.attributes : item; 
 
-                    const dataFormatada = new Date(content.data_publicacao || content.createdAt).toLocaleDateString('pt-BR');
+                    const titulo = content.Titulo || 'Título Não Encontrado';
+                    const dataDeUso = content.data_publicacao || content.createdAt || new Date(); 
+                    const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
+                    
+                    // CORREÇÃO FINAL DE EXIBIÇÃO DO CONTEÚDO (Lendo apenas o texto simples)
+                    const corpoTextoSimples = content.conteudo && 
+                                              content.conteudo[0] && 
+                                              content.conteudo[0].children[0] ? 
+                                              content.conteudo[0].children[0].text : 
+                                              'Corpo do Artigo não pode ser formatado. Utilize texto simples no CMS.';
                     
                     // Estrutura HTML do artigo completo
                     container.innerHTML = `
-                        <h1 class="display-4 mb-4">${content.Titulo}</h1>
+                        <h1 class="display-4 mb-4">${titulo}</h1>
                         <p class="text-muted mb-5">Publicado em: ${dataFormatada}</p>
                         
                         <div class="artigo-corpo">
-                            ${content.conteudo[0].children[0].text} 
-                            </div>
+                            <p>${corpoTextoSimples}</p>
+                        </div>
                         
                         <a href="/" class="btn btn-outline-primary mt-5">← Voltar para a Home</a>
                     `;
