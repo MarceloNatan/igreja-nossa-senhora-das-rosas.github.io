@@ -1,4 +1,4 @@
-// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL DE FUNCIONALIDADE (REST API)
+// Arquivo: assets/js/strapi-fetch.js - CÓDIGO FINAL E FUNCIONAL
 
 document.addEventListener('DOMContentLoaded', () => {
     // URL REST API com HTTPS e POPULATE
@@ -17,19 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.data && data.data.length > 0) {
                 data.data.forEach(item => {
-                    // VERIFICAÇÃO CRÍTICA (Se o item estiver corrompido, pulamos)
-                    if (!item.attributes || !item.attributes.Titulo) { 
-                        console.warn("Item de artigo inválido encontrado. Pulando.");
+                    
+                    // CORREÇÃO FINAL: O item.attributes não existe, então usamos o item diretamente.
+                    if (!item.Titulo) { 
+                        console.warn("Item de artigo inválido ou sem Título. Pulando.");
                         return; 
                     }
                     
-                    const artigo = item.attributes;
-                    
-                    // Ajuste o objeto aqui para o nome correto do campo "Titulo" (T maiúsculo)
-                    const tituloDoArtigo = artigo.Titulo; 
-                    
-                    // Lógica de Data Segura: Tenta a data publicada ou a data de criação
-                    const dataDeUso = artigo.data_publicacao || artigo.createdAt || new Date(); 
+                    // Leitura de dados 'planos'
+                    const tituloDoArtigo = item.Titulo; 
+                    const slugDoArtigo = item.slug;
+                    const dataDeUso = item.data_publicacao || item.createdAt || new Date(); 
                     const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
 
                     const cardHTML = `
@@ -39,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <h5 class="card-title">${tituloDoArtigo}</h5>
                                     <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
                                     
-                                    <a href="/artigos/${artigo.slug}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
+                                    <a href="/artigos/${slugDoArtigo}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
                                 </div>
                             </div>
                         </div>
