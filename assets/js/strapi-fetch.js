@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <h5 class="card-title">${tituloDoArtigo}</h5>
                                     <p class="card-text"><small class="text-muted">Publicado em: ${dataFormatada}</small></p>
                                     
-                                    <a href="/artigos/${slugDoArtigo}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
+                                    <a href="/artigo-detalhe.html?slug=${slugDoArtigo}" class="btn btn-sm btn-outline-dark mt-3">Continuar Lendo</a>
                                 </div>
                             </div>
                         </div>

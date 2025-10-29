@@ -1,0 +1,60 @@
+---
+layout: default
+title: Detalhe do Artigo
+---
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <div id="artigo-detalhe-conteudo">
+                <p class="text-center">Carregando artigo...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ESTE SCRIPT BUSCA O ARTIGO CORRETO PELO SLUG NA URL
+
+    // 1. Obtém o slug da URL (ex: "artigoj")
+    const urlParams = new URLSearchParams(window.location.search);
+    const slug = urlParams.get('slug');
+
+    if (slug) {
+        const apiURL = `https://cms.igrejanossasenhoradasrosas.com.br/api/artigos?filters[slug][$eq]=${slug}&populate=*`;
+        
+        fetch(apiURL)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('artigo-detalhe-conteudo');
+                
+                if (data.data && data.data.length > 0) {
+                    const artigo = data.data[0]; 
+                    // Se o seu JSON é "flat", usamos o objeto inteiro, se não, usamos .attributes
+                    const content = artigo.attributes ? artigo.attributes : artigo; 
+
+                    const dataFormatada = new Date(content.data_publicacao || content.createdAt).toLocaleDateString('pt-BR');
+                    
+                    // Estrutura HTML do artigo completo
+                    container.innerHTML = `
+                        <h1 class="display-4 mb-4">${content.Titulo}</h1>
+                        <p class="text-muted mb-5">Publicado em: ${dataFormatada}</p>
+                        
+                        <div class="artigo-corpo">
+                            ${content.conteudo[0].children[0].text} 
+                            </div>
+                        
+                        <a href="/" class="btn btn-outline-primary mt-5">← Voltar para a Home</a>
+                    `;
+                } else {
+                    container.innerHTML = '<h1 class="text-center">Artigo não encontrado.</h1>';
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao buscar artigo:", error);
+                document.getElementById('artigo-detalhe-conteudo').innerHTML = '<h1 class="text-danger text-center">Falha ao carregar o artigo.</h1>';
+            });
+    } else {
+        document.getElementById('artigo-detalhe-conteudo').innerHTML = '<h1 class="text-center">Slug não fornecido.</h1>';
+    }
+</script>
