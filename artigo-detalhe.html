@@ -31,19 +31,17 @@ title: Detalhe do Artigo
                 
                 if (data.data && data.data.length > 0) {
                     const item = data.data[0];
-                    
-                    // CORREÇÃO CRÍTICA: Assume a estrutura plana que o JSON da API envia
-                    // O seu JSON não tem o 'attributes' aninhado, então usamos 'item' diretamente
                     const content = item.attributes ? item.attributes : item; 
 
                     const titulo = content.Titulo || 'Título Não Encontrado';
                     const dataDeUso = content.data_publicacao || content.createdAt || new Date(); 
                     const dataFormatada = new Date(dataDeUso).toLocaleDateString('pt-BR');
                     
-                    // CORREÇÃO FINAL DE EXIBIÇÃO DO CONTEÚDO (Lendo apenas o texto simples)
+                    // CORREÇÃO CRÍTICA FINAL: Tenta ler o primeiro parágrafo de forma ultra-segura
                     const corpoTextoSimples = content.conteudo && 
                                               content.conteudo[0] && 
-                                              content.conteudo[0].children[0] ? 
+                                              content.conteudo[0].children[0] && 
+                                              content.conteudo[0].children[0].text ? 
                                               content.conteudo[0].children[0].text : 
                                               'Corpo do Artigo não pode ser formatado. Utilize texto simples no CMS.';
                     
